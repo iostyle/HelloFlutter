@@ -9,6 +9,7 @@ class MyApp extends StatelessWidget {
     return new MaterialApp(
       title: 'Startup Name Generator',
       home: new RandomWords(),
+      theme: new ThemeData(primaryColor: Colors.pinkAccent),
     );
   }
 }
@@ -28,10 +29,41 @@ class RandomWordsState extends State<RandomWords> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(
-        title: new Text('Startup Name Generator'),
-      ),
-      body: _buildSuggestions(),
+        appBar: new AppBar(
+          title: new Text('Startup Name Generator'),
+          actions: <Widget>[
+            new IconButton(icon: new Icon(Icons.list), onPressed: _pushSaved)
+          ],
+        ),
+        body: _buildSuggestions());
+  }
+
+  void _pushSaved() {
+    Navigator.of(context).push(
+      new MaterialPageRoute(builder: (context) {
+        final tiles = _saved.map(
+          (pair) {
+            return new ListTile(
+              title: new Text(
+                pair.asPascalCase,
+                style: _biggerFont,
+              ),
+            );
+          },
+        );
+
+        final divided = ListTile.divideTiles(
+          context: context,
+          tiles: tiles,
+        ).toList();
+
+        return new Scaffold(
+          appBar: new AppBar(
+            title: new Text('Saved Suggestions'),
+          ),
+          body: new ListView(children: divided),
+        );
+      }),
     );
   }
 
@@ -61,24 +93,23 @@ class RandomWordsState extends State<RandomWords> {
     final _alreadySaved = _saved.contains(pair);
 
     return new ListTile(
-      title: new Text(
-        pair.asPascalCase,
-        style: _biggerFont,
-      ),
-      trailing: new Icon(
-        _alreadySaved ? Icons.favorite : Icons.favorite_border,
-        color: _alreadySaved ? Colors.red : null,
-      ),
-      onTap: () {
-        // 提示: 在Flutter的响应式风格的框架中，调用setState() 会为State对象触发build()方法，从而导致对UI的更新
-        setState(() {
-          if (_alreadySaved) {
-            _saved.remove(pair);
-          } else {
-            _saved.add(pair);
-          }
+        title: new Text(
+          pair.asPascalCase,
+          style: _biggerFont,
+        ),
+        trailing: new Icon(
+          _alreadySaved ? Icons.favorite : Icons.favorite_border,
+          color: _alreadySaved ? Colors.red : null,
+        ),
+        onTap: () {
+          // 提示: 在Flutter的响应式风格的框架中，调用setState() 会为State对象触发build()方法，从而导致对UI的更新
+          setState(() {
+            if (_alreadySaved) {
+              _saved.remove(pair);
+            } else {
+              _saved.add(pair);
+            }
+          });
         });
-      },
-    );
   }
 }
